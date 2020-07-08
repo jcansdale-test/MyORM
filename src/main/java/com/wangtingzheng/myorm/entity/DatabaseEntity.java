@@ -1,5 +1,11 @@
 package com.wangtingzheng.myorm.entity;
 
+import com.wangtingzheng.myorm.exception.TableItemNotFoundException;
+import com.wangtingzheng.myorm.exception.TableNotFoundException;
+import com.wangtingzheng.myorm.reflection.DatabaseReflection;
+import com.wangtingzheng.myorm.reflection.TableReflection;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,7 +14,12 @@ import java.util.List;
  * @features
  */
 public class DatabaseEntity {
-    List<TableEntity> tableEntities;
+    List<TableEntity> tableEntities = new ArrayList<>();
+    Class database;
+
+    public DatabaseEntity(Class database) {
+        this.database = database;
+    }
 
     public DatabaseEntity(List<TableEntity> tableEntities) {
         this.tableEntities = tableEntities;

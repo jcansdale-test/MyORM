@@ -1,5 +1,8 @@
 package com.wangtingzheng.myorm.entity;
 
+import com.wangtingzheng.myorm.exception.TableItemNotFoundException;
+import com.wangtingzheng.myorm.reflection.TableReflection;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +13,12 @@ import java.util.List;
  */
 public class TableEntity {
     List<TableItemEntity> tableItemEntities = new ArrayList<>();
+    Class table;
+
+    public TableEntity(Class table) {
+        this.table = table;
+
+    }
 
     public TableEntity() {
     }
@@ -31,5 +40,9 @@ public class TableEntity {
     }
     public int getSize(){
         return tableItemEntities.size();
+    }
+
+    public Class getTable() {
+        return table;
     }
 }

@@ -11,6 +11,6 @@ import com.wangtingzheng.myorm.annotation.OrmTable;
 @OrmDatabase
 public class MyDatabase {
     @OrmTable()
-    MyTable myTable;
+    public MyTable myTable;
 
 }

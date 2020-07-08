@@ -4,6 +4,7 @@ import com.wangtingzheng.myorm.database.Mysql;
 import com.wangtingzheng.myorm.database.SQLite;
 import com.wangtingzheng.myorm.entity.DatabaseConnectionEntity;
 import com.wangtingzheng.myorm.entity.DatabaseEntity;
+import com.wangtingzheng.myorm.entity.TableEntity;
 import com.wangtingzheng.myorm.enums.DatabaseTypeEnum;
 import com.wangtingzheng.myorm.exception.DatabaseNotFoundException;
 import com.wangtingzheng.myorm.exception.TableNotFoundException;
@@ -31,7 +32,7 @@ public class DatabaseApt {
     /**
      * 解析数据库类中的连接信息
      */
-    public void getDatabaseConnection(){
+    private void getDatabaseConnection(){
         try {
             databaseConnectionEntity = new DatabaseReflection(database).toDatabaseConnectionEntity();
         } catch (DatabaseNotFoundException e) {
@@ -42,7 +43,7 @@ public class DatabaseApt {
     /**
      * 解析数据库类中的表信息
      */
-    public void getTable(){
+    private void getTable(){
         try {
             databaseEntity = new DatabaseReflection(database).toDatabaseEntity();
         } catch (TableNotFoundException e) {
@@ -63,6 +64,12 @@ public class DatabaseApt {
         return null;
     }
 
-
+    /*
+    public TableApt newTableAptInstance(String name){
+        for(TableEntity tableEntity:databaseEntity.getTableEntities()){
+            if (name.equals(tableEntity.getTable().getName())){
+                return new TableApt(tableEntity.getTable());
+            }
+        }*/
 
 }

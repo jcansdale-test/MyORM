@@ -1,12 +1,12 @@
 package com.wangtingzheng.myorm.apt;
 
-import com.wangtingzheng.myorm.annotation.OrmItem;
 import com.wangtingzheng.myorm.entity.TableItemEntity;
 import com.wangtingzheng.myorm.enums.ItemTypeEnum;
 import com.wangtingzheng.myorm.exception.TableItemNotFoundException;
 import com.wangtingzheng.myorm.reflection.TableReflection;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,4 +53,24 @@ public class TableApt {
     public String getCreateSQL() {
         return createSQL;
     }
+
+    /*
+    public boolean add(Object object){
+        Class c = object.getClass();
+
+    }
+    public boolean delete(Object object){
+
+    }
+    public boolean update(Object oldObject, Object newObject){
+
+    }
+
+    public ResultSet select(Object object){
+
+    }
+
+    public void close(){
+
+    }*/
 }
