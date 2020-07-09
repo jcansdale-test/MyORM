@@ -141,6 +141,32 @@ public class SQL {
         return excuteSQLWithReturn(connection,getSelectSQL(tableName,value));
     }
 
+    //update mytable set password = "233" where username = "wtz";
+    private static  String getUpdateSQL(String tableName, HashMap<String,String> oldValue, HashMap<String,String> newValue){
+        String sql = "update "+tableName+" set ";
+        String selectItems = "";
+        Set<String> selectSet = oldValue.keySet();
+        for (String item : selectSet) {
+            String itemValue = oldValue.get(item);
+            if (!"".equals(itemValue))
+                selectItems = selectItems + item + " = " + "\"" +itemValue+"\""+" && ";
+        }
+        selectItems = selectItems.substring(0, selectItems.length()-4)+";";
+
+        String updateItems = "";
+        Set<String> updateSet = newValue.keySet();
+        for (String item : updateSet) {
+            String itemValue = newValue.get(item);
+            if (!"".equals(itemValue))
+                updateItems = updateItems + item + " = " + "\"" +itemValue+"\""+" , ";
+        }
+        updateItems = updateItems.substring(0, updateItems.length()-3);
+        return sql + updateItems+" where "+selectItems;
+    }
+    public static boolean update(Connection connection, String tableName, HashMap<String,String> oldValue, HashMap<String,String> newValue){
+        return executeSQL(connection,getUpdateSQL(tableName, oldValue,newValue));
+    }
+
 
     /*
     //update mytable set username = "wtz", password = "1234 where;
@@ -151,6 +177,10 @@ public class SQL {
     public static void main(String[] args) {
         HashMap<String,String> hashMap = new HashMap<>();
         hashMap.put("username","wtz");
-        System.out.println(getSelectSQL("mytable",hashMap));
+
+        HashMap<String,String> hashMap1 = new HashMap<>();
+        hashMap1.put("username","gyc");
+        hashMap1.put("password","123");
+        System.out.println(getUpdateSQL("hello",hashMap,hashMap1));
     }
 }

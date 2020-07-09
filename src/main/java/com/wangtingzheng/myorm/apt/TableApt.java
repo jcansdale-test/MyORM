@@ -2,16 +2,13 @@ package com.wangtingzheng.myorm.apt;
 
 import com.wangtingzheng.myorm.annotation.OrmItem;
 import com.wangtingzheng.myorm.entity.TableItemEntity;
-import com.wangtingzheng.myorm.enums.ItemTypeEnum;
 import com.wangtingzheng.myorm.exception.TableItemNotFoundException;
 import com.wangtingzheng.myorm.reflection.ReflectUtils;
 import com.wangtingzheng.myorm.reflection.TableReflection;
 import com.wangtingzheng.myorm.util.SQL;
 
 import java.lang.reflect.Field;
-import java.security.Key;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -109,21 +106,18 @@ public class TableApt {
         return delete(getItem(object));
     }
 
-    private boolean update(HashMap<String,String> value){
-        return false;
+    private boolean update(HashMap<String,String> oldValue, HashMap<String,String> newValue){
+        return SQL.update(connection,tableName, oldValue,newValue);
     }
-    public boolean update(Object object){
-        return update(getItem(object));
+    public boolean update(Object oldObject,Object newObject){
+        useDatabase();
+        return update(getItem(oldObject),getItem(newObject));
     }
 
     public boolean drop(){
         return SQL.dropTable(connection, tableName);
     }
 
-    /*
-    private HashMap<String,String> select(HashMap<String,String> value){
-        return ;
-    }*/
     public ResultSet select(HashMap<String,String> value){
         return SQL.select(connection,tableName,value);
     }
@@ -131,6 +125,7 @@ public class TableApt {
     public ResultSet select(Object object){
         return select(getItem(object));
     }
+
     public void close(){
         try {
             connection.close();

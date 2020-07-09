@@ -29,7 +29,7 @@ public class DatabaseReflection {
     public DatabaseConnectionEntity toDatabaseConnectionEntity() throws DatabaseNotFoundException {
         if (database.isAnnotationPresent(OrmDatabase.class)){
             OrmDatabase ormDatabase = (OrmDatabase) database.getAnnotation(OrmDatabase.class);
-            return new DatabaseConnectionEntity(ormDatabase.type(),ormDatabase.host(),ormDatabase.username(),ormDatabase.password(),ormDatabase.openDatabase(),ormDatabase.serverTimezone());
+            return new DatabaseConnectionEntity(ormDatabase.type(), ormDatabase.extendType(), ormDatabase.host(),ormDatabase.username(),ormDatabase.password(),ormDatabase.openDatabase(),ormDatabase.serverTimezone());
         }
         else {
             throw new DatabaseNotFoundException("Database annotation not found.", database);

@@ -1,18 +1,18 @@
 package com.wangtingzheng.myorm.apt;
 
+import com.wangtingzheng.myorm.database.DatabaseLayer;
+import com.wangtingzheng.myorm.database.ExtendSample;
 import com.wangtingzheng.myorm.database.Mysql;
 import com.wangtingzheng.myorm.database.SQLite;
 import com.wangtingzheng.myorm.entity.DatabaseConnectionEntity;
 import com.wangtingzheng.myorm.entity.DatabaseEntity;
 import com.wangtingzheng.myorm.enums.DatabaseTypeEnum;
-import com.wangtingzheng.myorm.exception.DatabaseConnectionAnnotationNotFound;
-import com.wangtingzheng.myorm.exception.DatabaseNotFoundException;
-import com.wangtingzheng.myorm.exception.TableClassNotFoundException;
-import com.wangtingzheng.myorm.exception.TableNotFoundException;
+import com.wangtingzheng.myorm.exception.*;
 import com.wangtingzheng.myorm.reflection.DatabaseReflection;
 import com.wangtingzheng.myorm.util.SQL;
-
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * @author WangTingZheng
@@ -25,7 +25,7 @@ public class DatabaseApt {
     public Connection connection;
     public DatabaseEntity databaseEntity;
 
-    public DatabaseApt(Class database) throws TableNotFoundException, DatabaseConnectionAnnotationNotFound {
+    public DatabaseApt(Class database) throws TableNotFoundException, DatabaseConnectionAnnotationNotFound, DatabaseTypeNotFound, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, SQLException, ClassNotFoundException {
         this.database = database;
         this.databaseConnectionEntity = getDatabaseConnection();
         this.connection = getConnection();
@@ -60,13 +60,20 @@ public class DatabaseApt {
      * 使用获得的数据库连接信息进行连接，获得连接
      * @return 获得的连接
      */
-    public Connection getConnection(){
+    public Connection getConnection() throws DatabaseTypeNotFound, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, SQLException, ClassNotFoundException {
+        if (databaseConnectionEntity.type == DatabaseTypeEnum.EXTEND && databaseConnectionEntity.extendType != ExtendSample.class){ //如果选择的是扩展数据库并且用户已经填值了的话
+            if (databaseConnectionEntity.extendType.getSuperclass() == DatabaseLayer.class){
+                DatabaseLayer databaseLayer = (DatabaseLayer) databaseConnectionEntity.extendType.getConstructor(DatabaseConnectionEntity.class).newInstance(databaseConnectionEntity);
+                return databaseLayer.getConnection();//获得叫getConnection的函数，执行它，获得返回值
+            }
+        }
         if (databaseConnectionEntity.type == DatabaseTypeEnum.MYSQL){
             return new Mysql(databaseConnectionEntity).getConnection();
         }else if (databaseConnectionEntity.type == DatabaseTypeEnum.SQLITE){
             return new SQLite(databaseConnectionEntity).getConnection();
         }
-        return null;
+
+        throw new DatabaseTypeNotFound("Database not found.", database);
     }
 
     /**
@@ -79,7 +86,7 @@ public class DatabaseApt {
      * @return 表所对应的 tableApt对象
      * @throws TableClassNotFoundException 当数据库类中找不到这个表时，会报错
      */
-    public TableApt newTableAptInstance(String name) throws TableClassNotFoundException {
+    public TableApt newTableAptInstance(String name) throws TableClassNotFoundException, DatabaseTypeNotFound, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, SQLException, ClassNotFoundException {
 
         for(Class myClass: databaseEntity.getTableClasses()){
             if (myClass.getSimpleName().equals(name)){

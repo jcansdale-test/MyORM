@@ -9,14 +9,16 @@ import com.wangtingzheng.myorm.enums.DatabaseTypeEnum;
  */
 public class DatabaseConnectionEntity {
     public DatabaseTypeEnum type;
+    public Class extendType;
     public String host;
     public String username;
     public String password;
     public String openDatabase;
     public String serverTimezone;
 
-    public DatabaseConnectionEntity(DatabaseTypeEnum type, String host, String username, String password, String openDatabase, String serverTimezone) {
+    public DatabaseConnectionEntity(DatabaseTypeEnum type, Class extendType, String host, String username, String password, String openDatabase, String serverTimezone) {
         this.type = type;
+        this.extendType = extendType;
         this.host = host;
         this.username = username;
         this.password = password;
