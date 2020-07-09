@@ -19,12 +19,12 @@ import java.sql.Connection;
  * @features
  */
 public class DatabaseApt {
-    public DatabaseConnectionEntity databaseConnectionEntity;
-    public Class database;
-    public Connection connection;
-    public DatabaseEntity databaseEntity;
+    public DatabaseConnectionEntity databaseConnectionEntity; //数据库连接实体，保存着数据库连接相关的信息，比如说密码
+    public Class<com.wangtingzheng.myorm.test.MyDatabase> database; //orm数据库的类
+    public Connection connection; //数据库连接对象
+    public DatabaseEntity databaseEntity; //数据库实体，保存着数据库中表的信息，通过反射获得
 
-    public DatabaseApt(Class database) throws DatabaseConnectionAnnotationNotFound, NoSuchMethodException, DatabaseTypeNotFound, ConnectionGetFailed, TableNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+    public DatabaseApt(Class<com.wangtingzheng.myorm.test.MyDatabase> database) throws DatabaseConnectionAnnotationNotFound, NoSuchMethodException, DatabaseTypeNotFound, ConnectionGetFailed, TableNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
         this.database = database;
         this.databaseConnectionEntity = getDatabaseConnection();
         this.connection = getConnection();
@@ -61,8 +61,8 @@ public class DatabaseApt {
      */
     public Connection getConnection() throws NoSuchMethodException, ConnectionGetFailed, DatabaseTypeNotFound, IllegalAccessException, InvocationTargetException, InstantiationException {
         if (databaseConnectionEntity.type == DatabaseTypeEnum.EXTEND && databaseConnectionEntity.extendType != ExtendSample.class){ //如果选择的是扩展数据库并且用户已经填值了的话
-            if (databaseConnectionEntity.extendType.getSuperclass() == DatabaseLayer.class){
-                DatabaseLayer databaseLayer = (DatabaseLayer) databaseConnectionEntity.extendType.getConstructor(DatabaseConnectionEntity.class).newInstance(databaseConnectionEntity);
+            if (databaseConnectionEntity.extendType.getSuperclass() == DatabaseLayer.class){ //如果改类继承了DatabaseLayer类
+                DatabaseLayer databaseLayer = (DatabaseLayer) databaseConnectionEntity.extendType.getConstructor(DatabaseConnectionEntity.class).newInstance(databaseConnectionEntity); //创建数据库驱动对象
                 return databaseLayer.getConnection();//获得叫getConnection的函数，执行它，获得返回值
             }
         }
@@ -85,7 +85,7 @@ public class DatabaseApt {
      * @return 表所对应的 tableApt对象
      * @throws TableClassNotFoundException 当数据库类中找不到这个表时，会报错
      */
-    public TableApt newTableAptInstance(String name) throws TableClassNotFoundException, DatabaseTypeNotFound, NoSuchMethodException, ConnectionGetFailed, IllegalAccessException, InstantiationException, InvocationTargetException {
+    public TableApt newTableAptInstance(String name) throws TableClassNotFoundException, DatabaseTypeNotFound, NoSuchMethodException, ConnectionGetFailed, IllegalAccessException, InstantiationException, InvocationTargetException, TableItemNotFoundException {
 
         for(Class myClass: databaseEntity.getTableClasses()){
             if (myClass.getSimpleName().equals(name)){
@@ -95,8 +95,17 @@ public class DatabaseApt {
         throw new TableClassNotFoundException("Table class not found in database when get new TableApt", database);
     }
 
+    /**
+     * 创建数据库，数据库名称就是数据库类的类名称
+     * @return 成功为true，不成功为false
+     */
     public boolean create(){
         return SQL.createDatabase(connection, database.getSimpleName());
     }
+
+    /**
+     * 删除数据库
+     * @return 成功为true，不成功为false
+     */
     public boolean delete() {return SQL.dropDatabase(connection, database.getSimpleName());}
 }

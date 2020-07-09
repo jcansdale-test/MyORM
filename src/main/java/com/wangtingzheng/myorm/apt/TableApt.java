@@ -19,12 +19,12 @@ import java.util.*;
  * @features
  */
 public class TableApt {
-    public Class table;
-    public String tableName;
-    private List<TableItemEntity> tableItemEntities = new ArrayList<>();
+    public Class table; //表类
+    public String tableName; //表名称
+    private List<TableItemEntity> tableItemEntities = new ArrayList<>(); //表项实体，保存着表中各项的信息
+    private Connection connection; //数据库连接对象
+    String databaseName; //表所在数据库的名称
 
-    private Connection connection;
-    String databaseName;
 
     /**
      * table apt 初始化，完成的工作有
@@ -32,47 +32,55 @@ public class TableApt {
      * 通过反射获得表中定义的数据库属性
      * 生成插件数据库sql语句
      */
-    private void init(){
-        this.tableName = table.getSimpleName();
-        getTableItem();
-    }
-
-    public TableApt(Class table) {
-       this.table = table;
-       init();
-    }
-
-    public TableApt(Class table, Connection connection, String databaseName) {
+    public TableApt(Class table, Connection connection, String databaseName) throws TableItemNotFoundException {
         this.table = table;
         this.connection = connection;
         this.databaseName = databaseName;
-        init();
+        this.tableName = table.getSimpleName();
+        this.tableItemEntities = getTableItem();
     }
 
-    private void getTableItem(){
-        try {
-            tableItemEntities = new TableReflection(table).toTableEntity().getTableItems();
-        } catch (TableItemNotFoundException e) {
-            e.printStackTrace();
-        }
+    /**
+     * 通过反射获取表类中的表项的内容，包装成表项实体
+     */
+    private List<TableItemEntity> getTableItem() throws TableItemNotFoundException {
+        return new TableReflection(table).toTableEntity().getTableItems();
     }
 
 
+    /**
+     * 使用数据库
+     * @return 成功为true，失败为false
+     */
     private boolean useDatabase(){
         return SQL.useDatabase(connection, databaseName);
     }
 
+    /**
+     * 创建数据库，数据库名称为数据库类的类名
+     * @return 成功为true，失败为false
+     */
     public boolean create(){
         useDatabase();
         return SQL.createTable(connection, tableName, tableItemEntities);
     }
 
+    /**
+     * 向数据库添加数据
+     * @param value 含有orm注解的数据库表对象
+     * @return 成功为true，失败为false
+     */
     private boolean add(HashMap<String,String> value){
         useDatabase();
         return SQL.insert(connection,tableName,value);
     }
 
 
+    /**
+     * 从含有orm注解的数据库对象中获取表项信息，转换为hashmap
+     * @param object 含有orm注解的数据库对象
+     * @return 含有表项信息的hashmap，第一个为项目名称，第二个为项目的值
+     */
     private HashMap<String, String> getItem(Object object){
         Class clazz = object.getClass();
         HashMap<String,String> value = new HashMap<>();
@@ -91,12 +99,21 @@ public class TableApt {
         }
         return value;
     }
+
+    /**
+     * 向数据库添加数据
+     * @param object 含有orm注解的数据库表对象
+     * @return 成功为true，失败为false
+     * @throws DatabaseExcuteNoResult
+     * @throws SQLException
+     */
     public boolean add(Object object) throws DatabaseExcuteNoResult, SQLException {
         useDatabase();
         if (!isExisted(object))
             return add(getItem(object));
         return false;
     }
+
 
     private boolean delete(HashMap<String, String> value){
         useDatabase();
