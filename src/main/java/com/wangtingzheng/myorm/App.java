@@ -7,6 +7,8 @@ import com.wangtingzheng.myorm.test.MyTable;
 import com.wangtingzheng.myorm.reflection.ReflectUtils;
 
 import java.security.Key;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -33,6 +35,31 @@ public class App{
         table1.setUsername("wtz");
         tableApt.add(table1);
 
+        MyTable table3 = new MyTable();
+        table1.setPassword("123");
+        table1.setUsername("wtz2");
+        tableApt.add(table1);
+
+        MyTable table2 = new MyTable();
+        table2.setPassword("123");
+        //table2.setUsername("wtz");
+        ResultSet set = tableApt.select(table2);
+        ResultSetMetaData resultSetMetaData =  set.getMetaData();
+        int cols = resultSetMetaData.getColumnCount();
+        while (set.next()){
+            for (int i = 0; i < cols; i++) {
+                System.out.println(resultSetMetaData.getColumnName(i+1)+" "+set.getString(i+1));
+            }
+        }
+        tableApt.drop();
+
+
+
+
+
+        //tableApt.drop();
+
+
 
 
         /*
@@ -42,6 +69,7 @@ public class App{
         tableApt.delete(table2);
         */
 
+        /*
         //修改修改用户名是wtz的密码为 1234
         MyTable table3 = new MyTable();
         table3.setUsername("wtz");

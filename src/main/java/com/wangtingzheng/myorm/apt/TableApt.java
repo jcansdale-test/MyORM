@@ -116,11 +116,21 @@ public class TableApt {
         return update(getItem(object));
     }
 
-    /*
-    public ResultSet select(Object object){
-
+    public boolean drop(){
+        return SQL.dropTable(connection, tableName);
     }
-*/
+
+    /*
+    private HashMap<String,String> select(HashMap<String,String> value){
+        return ;
+    }*/
+    public ResultSet select(HashMap<String,String> value){
+        return SQL.select(connection,tableName,value);
+    }
+
+    public ResultSet select(Object object){
+        return select(getItem(object));
+    }
     public void close(){
         try {
             connection.close();

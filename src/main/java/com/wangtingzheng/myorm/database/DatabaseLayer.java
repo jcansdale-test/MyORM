@@ -10,6 +10,5 @@ public abstract class DatabaseLayer {
     public DatabaseLayer(DatabaseConnectionEntity databaseConnectionEntity) {
         this.databaseConnectionEntity = databaseConnectionEntity;
     }
-
     public abstract Connection getConnection();
 }

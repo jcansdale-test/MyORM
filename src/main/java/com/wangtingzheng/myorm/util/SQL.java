@@ -3,9 +3,7 @@ package com.wangtingzheng.myorm.util;
 import com.wangtingzheng.myorm.entity.TableItemEntity;
 import com.wangtingzheng.myorm.enums.ItemTypeEnum;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +32,17 @@ public class SQL {
             return false;
         }
         return true;
+    }
+
+    public static ResultSet excuteSQLWithReturn(Connection connection,String sql){
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet set = preparedStatement.executeQuery();
+            return set;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
     }
     public static boolean useDatabase(Connection connection, String databaseName){
         return executeSQL(connection, getUseDatabaseSql(databaseName));
@@ -100,6 +109,39 @@ public class SQL {
         return executeSQL(connection, getDeleteSQL(tableName,value));
     }
 
+    //drop database
+    private static String getDropDatabaseSQL(String databaseName){
+        return "drop database "+ databaseName+";\n";
+    }
+    public static boolean dropDatabase(Connection connection, String databaseName){
+        return executeSQL(connection, getDropDatabaseSQL(databaseName));
+    }
+
+    private static String getDropTableSQL(String tableName){
+        return "drop table "+ tableName +";\n";
+    }
+    public static boolean dropTable(Connection connection, String tableName){
+        return executeSQL(connection, getDropTableSQL(tableName));
+    }
+
+    //select from mytable where username = "wtz" && password =”123"
+    private static String getSelectSQL(String tableName, HashMap<String,String> value){
+        String sql = "select * from "+tableName+ " where ";
+        String items = "";
+        Set<String> set = value.keySet();
+        for (String item : set) {
+            String itemValue = value.get(item);
+            if (!"".equals(itemValue))
+                items = items + item + " = " + "\"" +itemValue+"\""+" && ";
+        }
+        items = items.substring(0, items.length()-4)+";";
+        return sql + items;
+    }
+    public static ResultSet select(Connection connection, String tableName, HashMap<String,String> value){
+        return excuteSQLWithReturn(connection,getSelectSQL(tableName,value));
+    }
+
+
     /*
     //update mytable set username = "wtz", password = "1234 where;
     private static String getUpdateSQL(String tableName){
@@ -108,7 +150,7 @@ public class SQL {
 
     public static void main(String[] args) {
         HashMap<String,String> hashMap = new HashMap<>();
-        hashMap.put("wtz","123");
-        System.out.println(getDeleteSQL("mytable",hashMap));
+        hashMap.put("username","wtz");
+        System.out.println(getSelectSQL("mytable",hashMap));
     }
 }

@@ -92,4 +92,5 @@ public class DatabaseApt {
     public boolean create(){
         return SQL.createDatabase(connection, database.getSimpleName());
     }
+    public boolean delete() {return SQL.dropDatabase(connection, database.getSimpleName());}
 }
