@@ -29,7 +29,7 @@ public class TableReflection {
                 tableEntity.addTableItem(tableItemEntity);
             }
         }
-        if (tableEntity.getSize() ==0){
+        if (tableEntity.getSize() == 0){
             throw new TableItemNotFoundException("table item not found.", table);
         }
         return tableEntity;

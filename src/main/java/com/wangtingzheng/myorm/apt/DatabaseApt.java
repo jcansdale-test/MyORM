@@ -4,11 +4,13 @@ import com.wangtingzheng.myorm.database.Mysql;
 import com.wangtingzheng.myorm.database.SQLite;
 import com.wangtingzheng.myorm.entity.DatabaseConnectionEntity;
 import com.wangtingzheng.myorm.entity.DatabaseEntity;
-import com.wangtingzheng.myorm.entity.TableEntity;
 import com.wangtingzheng.myorm.enums.DatabaseTypeEnum;
+import com.wangtingzheng.myorm.exception.DatabaseConnectionAnnotationNotFound;
 import com.wangtingzheng.myorm.exception.DatabaseNotFoundException;
+import com.wangtingzheng.myorm.exception.TableClassNotFoundException;
 import com.wangtingzheng.myorm.exception.TableNotFoundException;
 import com.wangtingzheng.myorm.reflection.DatabaseReflection;
+import com.wangtingzheng.myorm.util.SQL;
 
 import java.sql.Connection;
 
@@ -19,36 +21,39 @@ import java.sql.Connection;
  */
 public class DatabaseApt {
     public DatabaseConnectionEntity databaseConnectionEntity;
-    Class database;
+    public Class database;
+    public Connection connection;
+    public DatabaseEntity databaseEntity;
 
-    DatabaseEntity databaseEntity;
-
-    public DatabaseApt(Class database) {
+    public DatabaseApt(Class database) throws TableNotFoundException, DatabaseConnectionAnnotationNotFound {
         this.database = database;
-        getTable();
-        getDatabaseConnection();
+        this.databaseConnectionEntity = getDatabaseConnection();
+        this.connection = getConnection();
+        this.databaseEntity = getTable(database);
     }
 
     /**
      * 解析数据库类中的连接信息
      */
-    private void getDatabaseConnection(){
+    private DatabaseConnectionEntity getDatabaseConnection() throws DatabaseConnectionAnnotationNotFound {
         try {
-            databaseConnectionEntity = new DatabaseReflection(database).toDatabaseConnectionEntity();
+            return new DatabaseReflection(database).toDatabaseConnectionEntity();
         } catch (DatabaseNotFoundException e) {
             e.printStackTrace();
         }
+        throw new DatabaseConnectionAnnotationNotFound("Database connect annotation not found.", database);
     }
 
     /**
      * 解析数据库类中的表信息
      */
-    private void getTable(){
+    private DatabaseEntity getTable(Class database) throws TableNotFoundException {
         try {
-            databaseEntity = new DatabaseReflection(database).toDatabaseEntity();
+            return new DatabaseReflection(database).toDatabaseEntity();
         } catch (TableNotFoundException e) {
             e.printStackTrace();
         }
+        throw  new TableNotFoundException("Table not found when new databaseApt", database);
     }
 
     /**
@@ -64,12 +69,27 @@ public class DatabaseApt {
         return null;
     }
 
-    /*
-    public TableApt newTableAptInstance(String name){
-        for(TableEntity tableEntity:databaseEntity.getTableEntities()){
-            if (name.equals(tableEntity.getTable().getName())){
-                return new TableApt(tableEntity.getTable());
-            }
-        }*/
+    /**
+     * 返回一个table apt对象，主要的过程是：
+     * 通过名称查找数据库下的表，得到表所对应的类
+     * 准备好数据库连接对象
+     * 准备好数据库名称
+     * 通过表类、数据库连接对象、数据库名称创建一个tableApt对象
+     * @param name 表的名称
+     * @return 表所对应的 tableApt对象
+     * @throws TableClassNotFoundException 当数据库类中找不到这个表时，会报错
+     */
+    public TableApt newTableAptInstance(String name) throws TableClassNotFoundException {
 
+        for(Class myClass: databaseEntity.getTableClasses()){
+            if (myClass.getSimpleName().equals(name)){
+                return new TableApt(myClass, getConnection(),database.getSimpleName());
+            }
+        }
+        throw new TableClassNotFoundException("Table class not found in database when get new TableApt", database);
+    }
+
+    public boolean create(){
+        return SQL.createDatabase(connection, database.getSimpleName());
+    }
 }

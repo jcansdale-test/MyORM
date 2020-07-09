@@ -1,4 +1,4 @@
-package com.wangtingzheng.myorm.util;
+package com.wangtingzheng.myorm.reflection;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -51,6 +51,8 @@ public class ReflectUtils {
 
         return null;
     }
+
+
 
     /**
      * 通过字段名从对象或对象的父类中得到字段的值（调用字典的get方法）

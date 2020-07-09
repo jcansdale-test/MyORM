@@ -1,9 +1,7 @@
 package com.wangtingzheng.myorm.entity;
 
-import com.wangtingzheng.myorm.exception.TableItemNotFoundException;
-import com.wangtingzheng.myorm.exception.TableNotFoundException;
+import com.wangtingzheng.myorm.exception.TableClassNotFoundException;
 import com.wangtingzheng.myorm.reflection.DatabaseReflection;
-import com.wangtingzheng.myorm.reflection.TableReflection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +13,27 @@ import java.util.List;
  */
 public class DatabaseEntity {
     List<TableEntity> tableEntities = new ArrayList<>();
+    List<Class> tableClasses;
     Class database;
 
     public DatabaseEntity(Class database) {
         this.database = database;
+        this.tableClasses = getTablesClass(database);
     }
 
+    public List<Class> getTableClasses() {
+        return tableClasses;
+    }
+
+    public List<Class> getTablesClass(Class clazz){
+        List<Class> tableClazz = new ArrayList<>();
+        try {
+              tableClazz = new DatabaseReflection(clazz).getTableClass();
+        } catch (TableClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return tableClazz;
+    }
     public DatabaseEntity(List<TableEntity> tableEntities) {
         this.tableEntities = tableEntities;
     }
