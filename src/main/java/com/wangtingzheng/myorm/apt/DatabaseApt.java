@@ -12,7 +12,6 @@ import com.wangtingzheng.myorm.reflection.DatabaseReflection;
 import com.wangtingzheng.myorm.util.SQL;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * @author WangTingZheng
@@ -25,7 +24,7 @@ public class DatabaseApt {
     public Connection connection;
     public DatabaseEntity databaseEntity;
 
-    public DatabaseApt(Class database) throws TableNotFoundException, DatabaseConnectionAnnotationNotFound, DatabaseTypeNotFound, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, SQLException, ClassNotFoundException {
+    public DatabaseApt(Class database) throws DatabaseConnectionAnnotationNotFound, NoSuchMethodException, DatabaseTypeNotFound, ConnectionGetFailed, TableNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
         this.database = database;
         this.databaseConnectionEntity = getDatabaseConnection();
         this.connection = getConnection();
@@ -60,7 +59,7 @@ public class DatabaseApt {
      * 使用获得的数据库连接信息进行连接，获得连接
      * @return 获得的连接
      */
-    public Connection getConnection() throws DatabaseTypeNotFound, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, SQLException, ClassNotFoundException {
+    public Connection getConnection() throws NoSuchMethodException, ConnectionGetFailed, DatabaseTypeNotFound, IllegalAccessException, InvocationTargetException, InstantiationException {
         if (databaseConnectionEntity.type == DatabaseTypeEnum.EXTEND && databaseConnectionEntity.extendType != ExtendSample.class){ //如果选择的是扩展数据库并且用户已经填值了的话
             if (databaseConnectionEntity.extendType.getSuperclass() == DatabaseLayer.class){
                 DatabaseLayer databaseLayer = (DatabaseLayer) databaseConnectionEntity.extendType.getConstructor(DatabaseConnectionEntity.class).newInstance(databaseConnectionEntity);
@@ -86,7 +85,7 @@ public class DatabaseApt {
      * @return 表所对应的 tableApt对象
      * @throws TableClassNotFoundException 当数据库类中找不到这个表时，会报错
      */
-    public TableApt newTableAptInstance(String name) throws TableClassNotFoundException, DatabaseTypeNotFound, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, SQLException, ClassNotFoundException {
+    public TableApt newTableAptInstance(String name) throws TableClassNotFoundException, DatabaseTypeNotFound, NoSuchMethodException, ConnectionGetFailed, IllegalAccessException, InstantiationException, InvocationTargetException {
 
         for(Class myClass: databaseEntity.getTableClasses()){
             if (myClass.getSimpleName().equals(name)){

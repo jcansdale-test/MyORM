@@ -2,11 +2,11 @@ package com.wangtingzheng.myorm.apt;
 
 import com.wangtingzheng.myorm.annotation.OrmItem;
 import com.wangtingzheng.myorm.entity.TableItemEntity;
+import com.wangtingzheng.myorm.exception.DatabaseExcuteNoResult;
 import com.wangtingzheng.myorm.exception.TableItemNotFoundException;
 import com.wangtingzheng.myorm.reflection.ReflectUtils;
 import com.wangtingzheng.myorm.reflection.TableReflection;
 import com.wangtingzheng.myorm.util.SQL;
-
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -91,9 +91,11 @@ public class TableApt {
         }
         return value;
     }
-    public boolean add(Object object){
+    public boolean add(Object object) throws DatabaseExcuteNoResult, SQLException {
         useDatabase();
-        return add(getItem(object));
+        if (!isExisted(object))
+            return add(getItem(object));
+        return false;
     }
 
     private boolean delete(HashMap<String, String> value){
@@ -109,21 +111,28 @@ public class TableApt {
     private boolean update(HashMap<String,String> oldValue, HashMap<String,String> newValue){
         return SQL.update(connection,tableName, oldValue,newValue);
     }
-    public boolean update(Object oldObject,Object newObject){
+    public boolean update(Object oldObject,Object newObject) throws DatabaseExcuteNoResult, SQLException {
         useDatabase();
-        return update(getItem(oldObject),getItem(newObject));
+        if (!isExisted(oldObject))
+            return update(getItem(oldObject),getItem(newObject));
+        return false;
     }
 
     public boolean drop(){
         return SQL.dropTable(connection, tableName);
     }
 
-    public ResultSet select(HashMap<String,String> value){
+    public ResultSet select(HashMap<String,String> value) throws DatabaseExcuteNoResult {
         return SQL.select(connection,tableName,value);
     }
 
-    public ResultSet select(Object object){
+    public ResultSet select(Object object) throws DatabaseExcuteNoResult {
+        useDatabase();
         return select(getItem(object));
+    }
+
+    public boolean isExisted(Object object) throws SQLException, DatabaseExcuteNoResult {
+        return select(object).next();
     }
 
     public void close(){

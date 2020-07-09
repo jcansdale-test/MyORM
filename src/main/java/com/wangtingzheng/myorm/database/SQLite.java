@@ -1,7 +1,6 @@
 package com.wangtingzheng.myorm.database;
 
 import com.wangtingzheng.myorm.entity.DatabaseConnectionEntity;
-
 import java.sql.Connection;
 
 /**

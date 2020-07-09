@@ -1,6 +1,7 @@
 package com.wangtingzheng.myorm.database;
 
 import com.wangtingzheng.myorm.entity.DatabaseConnectionEntity;
+import com.wangtingzheng.myorm.exception.ConnectionGetFailed;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -18,7 +19,7 @@ public class Mysql extends DatabaseLayer {
 
     }
     @Override
-    public Connection getConnection() {
+    public Connection getConnection() throws ConnectionGetFailed {
         DATABASE_URL = DATABASE_URL + databaseConnectionEntity.getHost()+"/" + databaseConnectionEntity.getOpenDatabase()+"?serverTimezone="+ databaseConnectionEntity.getServerTimezone();
         try {
             String DRIVER = "com.mysql.cj.jdbc.Driver";
@@ -27,6 +28,6 @@ public class Mysql extends DatabaseLayer {
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        throw new ConnectionGetFailed("Connection get failed.", this.getClass());
     }
 }

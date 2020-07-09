@@ -2,6 +2,7 @@ package com.wangtingzheng.myorm.util;
 
 import com.wangtingzheng.myorm.entity.TableItemEntity;
 import com.wangtingzheng.myorm.enums.ItemTypeEnum;
+import com.wangtingzheng.myorm.exception.DatabaseExcuteNoResult;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -27,14 +28,14 @@ public class SQL {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.execute();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
             return false;
         }
         return true;
     }
 
-    public static ResultSet excuteSQLWithReturn(Connection connection,String sql){
+    public static ResultSet excuteSQLWithReturn(Connection connection,String sql) throws DatabaseExcuteNoResult {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet set = preparedStatement.executeQuery();
@@ -42,7 +43,7 @@ public class SQL {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        return null;
+        throw new DatabaseExcuteNoResult("Database excute no result", sql);
     }
     public static boolean useDatabase(Connection connection, String databaseName){
         return executeSQL(connection, getUseDatabaseSql(databaseName));
@@ -137,7 +138,7 @@ public class SQL {
         items = items.substring(0, items.length()-4)+";";
         return sql + items;
     }
-    public static ResultSet select(Connection connection, String tableName, HashMap<String,String> value){
+    public static ResultSet select(Connection connection, String tableName, HashMap<String,String> value) throws DatabaseExcuteNoResult {
         return excuteSQLWithReturn(connection,getSelectSQL(tableName,value));
     }
 
@@ -167,12 +168,6 @@ public class SQL {
         return executeSQL(connection,getUpdateSQL(tableName, oldValue,newValue));
     }
 
-
-    /*
-    //update mytable set username = "wtz", password = "1234 where;
-    private static String getUpdateSQL(String tableName){
-
-    }*/
 
     public static void main(String[] args) {
         HashMap<String,String> hashMap = new HashMap<>();

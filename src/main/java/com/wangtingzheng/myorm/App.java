@@ -26,9 +26,9 @@ public class App{
 
         TableApt tableApt = databaseApt.newTableAptInstance("MyTable");
         MyTable table = new MyTable();
-        table.setUsername("wtz11");
+        table.setUsername("wtz111");
         table.setPassword("12345");
-        tableApt.add(table);
+        System.out.println(tableApt.add(table));
     }
 
 }
