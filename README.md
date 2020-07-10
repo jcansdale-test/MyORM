@@ -53,11 +53,12 @@ This code will add a record to table named "MyTable" in database "Mydatabse".
 ```java
 DatabaseApt myDatabase = new DatabaseApt(MyDatabase.class);  //new database annotation process tool
 TableApt myTable = new myDatabase.newInstance(MyTable.class ); //get table annotation process tool
-MyTable record = new MyTable("wangtingzheng","iloveMyOrm");
-myDatabase.create();
-myTable.create();
-if(myTable.add(record)){}
+MyTable record = new MyTable("wangtingzheng","iloveMyOrm");  //new a record obejct
+myDatabase.create(); //create database if not existed
+myTable.create(); //create table if not existed
+if(myTable.add(record)){  //if add record successfully
     System.out.println("Record has been add to MyTable in Mydatabase.");
+}
 else{
     System.out.println("Add failed."); 
 }
