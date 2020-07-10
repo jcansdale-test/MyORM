@@ -134,7 +134,7 @@ public class TableApt {
     }
     public boolean update(Object oldObject,Object newObject) {
         useDatabase();
-        if (!isExisted(oldObject))
+        if (isExisted(oldObject))
             return update(getItem(oldObject),getItem(newObject));
         return false;
     }
