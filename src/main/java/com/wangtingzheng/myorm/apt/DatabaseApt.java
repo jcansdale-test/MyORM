@@ -24,7 +24,7 @@ public class DatabaseApt {
     public Connection connection; //数据库连接对象
     public DatabaseEntity databaseEntity; //数据库实体，保存着数据库中表的信息，通过反射获得
 
-    public DatabaseApt(Class<com.wangtingzheng.myorm.test.MyDatabase> database) throws DatabaseConnectionAnnotationNotFound, NoSuchMethodException, DatabaseTypeNotFound, ConnectionGetFailed, TableNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+    public DatabaseApt(Class database) throws DatabaseConnectionAnnotationNotFound, NoSuchMethodException, DatabaseTypeNotFound, ConnectionGetFailed, TableNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
         this.database = database;
         this.databaseConnectionEntity = getDatabaseConnection();
         this.connection = getConnection();
