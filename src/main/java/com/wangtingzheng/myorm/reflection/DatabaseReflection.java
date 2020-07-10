@@ -45,7 +45,8 @@ public class DatabaseReflection {
      */
     public DatabaseEntity toDatabaseEntity() throws TableNotFoundException {
         DatabaseEntity  databaseEntity = new DatabaseEntity(database);
-        for(Field field: database.getFields()){
+        for(Field field: database.getDeclaredFields()){
+            field.setAccessible(true);
             if (field.isAnnotationPresent(OrmTable.class)){
                 try {
                     databaseEntity.addTableEntity(new TableReflection(field.getType()).toTableEntity());
@@ -62,7 +63,8 @@ public class DatabaseReflection {
 
     public List<Class> getTableClass() throws TableClassNotFoundException {
         List<Class> clazz = new ArrayList<>();
-        for (Field field:database.getFields()){
+        for (Field field:database.getDeclaredFields()){
+            field.setAccessible(true);
             if(field.isAnnotationPresent(OrmTable.class)){
                 clazz.add(field.getType());
             }

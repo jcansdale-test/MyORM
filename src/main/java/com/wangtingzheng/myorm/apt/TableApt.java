@@ -32,12 +32,16 @@ public class TableApt {
      * 通过反射获得表中定义的数据库属性
      * 生成插件数据库sql语句
      */
-    public TableApt(Class table, Connection connection, String databaseName) throws TableItemNotFoundException {
+    public TableApt(Class table, Connection connection, String databaseName) {
         this.table = table;
         this.connection = connection;
         this.databaseName = databaseName;
         this.tableName = table.getSimpleName();
-        this.tableItemEntities = getTableItem();
+        try {
+            this.tableItemEntities = getTableItem();
+        } catch (TableItemNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -107,7 +111,7 @@ public class TableApt {
      * @throws DatabaseExcuteNoResult
      * @throws SQLException
      */
-    public boolean add(Object object) throws DatabaseExcuteNoResult, SQLException {
+    public boolean add(Object object){
         useDatabase();
         if (!isExisted(object))
             return add(getItem(object));
@@ -128,7 +132,7 @@ public class TableApt {
     private boolean update(HashMap<String,String> oldValue, HashMap<String,String> newValue){
         return SQL.update(connection,tableName, oldValue,newValue);
     }
-    public boolean update(Object oldObject,Object newObject) throws DatabaseExcuteNoResult, SQLException {
+    public boolean update(Object oldObject,Object newObject) {
         useDatabase();
         if (!isExisted(oldObject))
             return update(getItem(oldObject),getItem(newObject));
@@ -139,17 +143,23 @@ public class TableApt {
         return SQL.dropTable(connection, tableName);
     }
 
-    public ResultSet select(HashMap<String,String> value) throws DatabaseExcuteNoResult {
+    public ResultSet select(HashMap<String,String> value)  {
         return SQL.select(connection,tableName,value);
     }
 
-    public ResultSet select(Object object) throws DatabaseExcuteNoResult {
+    public ResultSet select(Object object) {
         useDatabase();
         return select(getItem(object));
     }
 
-    public boolean isExisted(Object object) throws SQLException, DatabaseExcuteNoResult {
-        return select(object).next();
+    public boolean isExisted(Object object)  {
+        boolean flag = false;
+        try {
+            flag = select(object).next();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return flag;
     }
 
     public void close(){

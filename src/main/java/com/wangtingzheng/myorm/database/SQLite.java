@@ -1,6 +1,8 @@
 package com.wangtingzheng.myorm.database;
 
 import com.wangtingzheng.myorm.entity.DatabaseConnectionEntity;
+import com.wangtingzheng.myorm.exception.ConnectionGetFailed;
+
 import java.sql.Connection;
 
 /**
@@ -14,7 +16,6 @@ public class SQLite extends DatabaseLayer{
     }
 
     @Override
-    public Connection getConnection() {
-        return null;
+    public Connection getConnection() throws ConnectionGetFailed { throw new ConnectionGetFailed("Connection get failed.", this.getClass());
     }
 }

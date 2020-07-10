@@ -23,6 +23,7 @@ public class TableReflection {
     public TableEntity toTableEntity() throws TableItemNotFoundException {
         TableEntity tableEntity = new TableEntity();
         for (Field field : table.getDeclaredFields()){
+            field.setAccessible(true);
             if (field.isAnnotationPresent(OrmItem.class)){
                 OrmItem ormItem = field.getAnnotation(OrmItem.class);
                 TableItemEntity tableItemEntity = new TableItemEntity(field.getName(), ormItem.type(), ormItem.length(), ormItem.isPrimaryKey());

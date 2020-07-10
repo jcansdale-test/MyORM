@@ -24,11 +24,15 @@ public class DatabaseApt {
     public Connection connection; //数据库连接对象
     public DatabaseEntity databaseEntity; //数据库实体，保存着数据库中表的信息，通过反射获得
 
-    public DatabaseApt(Class database) throws DatabaseConnectionAnnotationNotFound, NoSuchMethodException, DatabaseTypeNotFound, ConnectionGetFailed, TableNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+    public DatabaseApt(Class database) {
         this.database = database;
-        this.databaseConnectionEntity = getDatabaseConnection();
-        this.connection = getConnection();
-        this.databaseEntity = getTable(database);
+        try {
+            this.databaseConnectionEntity = getDatabaseConnection();
+            this.connection = getConnection();
+            this.databaseEntity = getTable(database);
+        } catch (DatabaseConnectionAnnotationNotFound |DatabaseTypeNotFound|TableNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -59,17 +63,26 @@ public class DatabaseApt {
      * 使用获得的数据库连接信息进行连接，获得连接
      * @return 获得的连接
      */
-    public Connection getConnection() throws NoSuchMethodException, ConnectionGetFailed, DatabaseTypeNotFound, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public Connection getConnection() throws DatabaseTypeNotFound {
         if (databaseConnectionEntity.type == DatabaseTypeEnum.EXTEND && databaseConnectionEntity.extendType != ExtendSample.class){ //如果选择的是扩展数据库并且用户已经填值了的话
             if (databaseConnectionEntity.extendType.getSuperclass() == DatabaseLayer.class){ //如果改类继承了DatabaseLayer类
-                DatabaseLayer databaseLayer = (DatabaseLayer) databaseConnectionEntity.extendType.getConstructor(DatabaseConnectionEntity.class).newInstance(databaseConnectionEntity); //创建数据库驱动对象
-                return databaseLayer.getConnection();//获得叫getConnection的函数，执行它，获得返回值
+                DatabaseLayer databaseLayer = null; //创建数据库驱动对象
+                try {
+                    databaseLayer = (DatabaseLayer) databaseConnectionEntity.extendType.getConstructor(DatabaseConnectionEntity.class).newInstance(databaseConnectionEntity);
+                    return databaseLayer.getConnection();//获得叫getConnection的函数，执行它，获得返回值
+                } catch (InstantiationException | IllegalAccessException |ConnectionGetFailed | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
             }
         }
-        if (databaseConnectionEntity.type == DatabaseTypeEnum.MYSQL){
-            return new Mysql(databaseConnectionEntity).getConnection();
-        }else if (databaseConnectionEntity.type == DatabaseTypeEnum.SQLITE){
-            return new SQLite(databaseConnectionEntity).getConnection();
+        try {
+            if (databaseConnectionEntity.type == DatabaseTypeEnum.MYSQL){
+                return new Mysql(databaseConnectionEntity).getConnection();
+            }else if (databaseConnectionEntity.type == DatabaseTypeEnum.SQLITE){
+                return new SQLite(databaseConnectionEntity).getConnection();
+            }
+        } catch (ConnectionGetFailed connectionGetFailed) {
+            connectionGetFailed.printStackTrace();
         }
 
         throw new DatabaseTypeNotFound("Database not found.", database);
@@ -85,11 +98,14 @@ public class DatabaseApt {
      * @return 表所对应的 tableApt对象
      * @throws TableClassNotFoundException 当数据库类中找不到这个表时，会报错
      */
-    public TableApt newTableAptInstance(String name) throws TableClassNotFoundException, DatabaseTypeNotFound, NoSuchMethodException, ConnectionGetFailed, IllegalAccessException, InstantiationException, InvocationTargetException, TableItemNotFoundException {
-
+    public TableApt newTableAptInstance(String name) throws TableClassNotFoundException {
         for(Class myClass: databaseEntity.getTableClasses()){
             if (myClass.getSimpleName().equals(name)){
-                return new TableApt(myClass, getConnection(),database.getSimpleName());
+                try {
+                    return new TableApt(myClass, getConnection(),database.getSimpleName());
+                } catch (DatabaseTypeNotFound e) {
+                    e.printStackTrace();
+                }
             }
         }
         throw new TableClassNotFoundException("Table class not found in database when get new TableApt", database);
