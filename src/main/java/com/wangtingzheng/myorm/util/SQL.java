@@ -65,8 +65,10 @@ public class SQL {
         Set<String> set = value.keySet();
         for (String item : set) {
             String itemValue = value.get(item);
-            items = items + item + ",";
-            itemValues = itemValues + "'"+itemValue+"'" + ",";
+            if (!"".equals(itemValue)){
+                items = items + item + ",";
+                itemValues = itemValues + "'"+itemValue+"'" + ",";
+            }
         }
         items = items.substring(0, items.length()-1)+")";
         itemValues = itemValues.substring(0, itemValues.length()-1)+");";
@@ -100,7 +102,8 @@ public class SQL {
         Set<String> set = value.keySet();
         for (String item : set) {
             String itemValue = value.get(item);
-            items = items + item + " = " + "\"" +itemValue+"\""+" && ";
+            if (!"".equals(itemValue))
+                items = items + item + " = " + "\"" +itemValue+"\""+" && ";
         }
         items = items.substring(0, items.length()-4)+";";
         return sql + items;
@@ -182,6 +185,6 @@ public class SQL {
         HashMap<String,String> hashMap1 = new HashMap<>();
         hashMap1.put("username","gyc");
         hashMap1.put("password","123");
-        System.out.println(getUpdateSQL("hello",hashMap,hashMap1));
+        System.out.println(getInsertSQL("hello",hashMap));
     }
 }
