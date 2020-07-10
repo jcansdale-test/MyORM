@@ -138,8 +138,14 @@ public class SQL {
         items = items.substring(0, items.length()-4)+";";
         return sql + items;
     }
-    public static ResultSet select(Connection connection, String tableName, HashMap<String,String> value) throws DatabaseExcuteNoResult {
-        return excuteSQLWithReturn(connection,getSelectSQL(tableName,value));
+    public static ResultSet select(Connection connection, String tableName, HashMap<String,String> value) {
+        ResultSet set = null;
+        try {
+            set = excuteSQLWithReturn(connection,getSelectSQL(tableName,value));
+        } catch (DatabaseExcuteNoResult databaseExcuteNoResult) {
+            databaseExcuteNoResult.printStackTrace();
+        }
+        return set;
     }
 
     //update mytable set password = "233" where username = "wtz";
